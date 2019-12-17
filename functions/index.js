@@ -22,3 +22,23 @@ exports.getScreams = functions.https.onRequest((request, response) => {
     })
     .catch((error) => console.error(error));
 });
+
+exports.createScream = functions.https.onRequest((request, response) => {
+  if (request.method !== "POST") {
+    return response.status(403).json({message: "Method not allowed"});
+  }
+  const newScream = {
+    body: request.body.body,
+    userHandle: request.body.userHandle,
+    createdAt: admin.firestore.Timestamp.fromDate(new Date()),
+  };
+
+  admin.firestore().collection("screams").add(newScream)
+    .then(doc => {
+      return response.json({message: `Document ${doc.id} created successfully!`});
+    })
+    .catch(error => {
+      console.log(error);
+      return response.status(500).json({error: "Something went wrong"});
+    });
+});
